@@ -69,7 +69,8 @@ seed_default_admin()
 # ============================================================
 @app.post("/api/auth/login", response_model=schemas.TokenResponse)
 def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == payload.username).first()
+    clean_username = payload.username.strip().lower()
+    user = db.query(User).filter(func.lower(User.username) == clean_username).first()
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Incorrect username or password")
     if not user.is_active:
@@ -90,13 +91,14 @@ def me(current_user: User = Depends(get_current_user)):
 # ============================================================
 @app.post("/api/users", response_model=schemas.UserOut)
 def create_user(payload: schemas.UserCreate, db: Session = Depends(get_db), _admin=Depends(require_admin)):
-    if db.query(User).filter(User.username == payload.username).first():
+    clean_username = payload.username.strip().lower()
+    if db.query(User).filter(func.lower(User.username) == clean_username).first():
         raise HTTPException(status_code=400, detail="This username is already taken")
     if payload.role not in ("admin", "employee"):
         raise HTTPException(status_code=400, detail="Role must be admin or employee")
     user = User(
         name=payload.name,
-        username=payload.username,
+        username=clean_username,
         password_hash=hash_password(payload.password),
         role=payload.role,
     )
