@@ -110,7 +110,7 @@ export const VendorRegistrationModal: React.FC<VendorRegistrationModalProps> = (
         setSuccess(true);
       } else {
         const errData = await res.json().catch(() => ({}));
-        setErrorMsg(errData.error || 'पंजीकरण में त्रुटि हुई। कृपया दोबारा प्रयास करें।');
+        setErrorMsg(errData.error || `पंजीकरण विफल (HTTP ${res.status}): कृपया दोबारा प्रयास करें या दूसरा मोबाइल नंबर दर्ज करें।`);
       }
     } catch (err: any) {
       console.error(err);

@@ -141,6 +141,18 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('hashchange', handleHash);
   }, [categories, vendors]);
 
+  // Secret Admin Shortcut: Ctrl + Shift + A to open Admin Console
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        setIsAdminOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Page Navigation Handlers
   const navigateToHome = () => {
     window.location.hash = '';
@@ -788,7 +800,12 @@ export const App: React.FC = () => {
       {/* Master Admin Console (Operations, Multi-Admin & Governance Hub) */}
       <AdminDashboard
         isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
+        onClose={() => {
+          setIsAdminOpen(false);
+          if (window.location.hash.includes('admin') || window.location.hash.includes('secure-console')) {
+            window.location.hash = '';
+          }
+        }}
         vendors={vendors}
         leads={leads}
         onToggleListing={handleToggleListing}
